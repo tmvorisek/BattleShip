@@ -2,7 +2,7 @@
 Networked battleship game using python and flask with socket-io
 
 ## User Stories
-Story | Todd points | Jason points | total
+Story | tmvorisek points | acheeseye points | total
 --- | --- | --- | ---
 I, Player, want to be able play battleship with another human player | 9 | 10 | **19**
 I, Player, want benefits based on what ships are in play | 8 | 10 | **18**
