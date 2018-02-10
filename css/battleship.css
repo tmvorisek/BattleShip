@@ -1,6 +1,7 @@
 .chat-box {
   position: absolute;
   bottom:30px;
+  width:100%;
 }
 
 .chat-text {
