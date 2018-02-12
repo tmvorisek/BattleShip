@@ -5,8 +5,8 @@ $(document).ready(function() {
   });
 
   socket.on('message', function(msg) {
-    console.log(msg)
-    $("#messages").append('<li><b>'+msg.name+':</b> '+msg.message+'</li>');
+    if (msg.type == "chat")
+      $("#messages").append('<li><b>'+msg.name+':</b> '+msg.message+'</li>');
   });
 
   $('#sendbutton').on('click', function() {
@@ -15,5 +15,6 @@ $(document).ready(function() {
       message:$('#message').val(),
       type:"chat"
     });
+    $('#message').val("");
   });
 });
