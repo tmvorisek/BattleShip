@@ -24,7 +24,7 @@ def index():
 @socketio.on('message')
 def handleMessage(msg):
   # print(msg)
-  if( msg.type == "chat" ):
+  if( msg["type"] == "chat" ):
     send(msg, broadcast=True)
 
 if __name__ == '__main__':
