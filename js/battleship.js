@@ -1,5 +1,6 @@
 $(document).ready(function() {
-  var socket = io.connect('http://127.0.0.1:5000');
+
+  var socket = io.connect( 'http://' + document.domain + ':' + location.port );
 
   for (var i = 1; i <= 100; i++) {
     // The number and letter designators
@@ -8,7 +9,7 @@ $(document).ready(function() {
       $(".bottom").prepend("<span class='aTops'>" + Math.abs(i - 11) + "</span>");
       $(".grid").append("<li class='points offset1 " + i + "'><span class='hole'></span></li>");
     } else {
-      $(".grid").append("<li class='points offset2 " + i   + "'><span class='hole'></span></li>");
+      $(".grid").append("<li class='points offset2 " + i + "'><span class='hole'></span></li>");
     }
     if (i == 11) {
       $(".top").prepend("<span class='aTops hidezero'>" + Math.abs(i - 11) + "</span>");
