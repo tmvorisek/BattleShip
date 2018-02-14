@@ -83,7 +83,8 @@ class TestBattleship(unittest.TestCase):
   def test_ShipClass(self):
     self.assertEqual(Ship().loc(), 0)
     self.assertEqual(Ship(8).loc(), 8)
-    # self.assertRaises(ValueError, Ship(200))
+    with self.assertRaises(ValueError):
+       Ship(200)
     self.assertEqual(Ship(10, 'destroyer').len(),2)
     self.assertFalse(Ship(10).isValidLocation(100))
     self.assertTrue(Ship(10).isValidLocation(50))
