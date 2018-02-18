@@ -1,7 +1,8 @@
 $(document).ready(function() {
-  var socket = io.connect('http://127.0.0.1:5000');
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
   
   socket.on('connect', function() {
+    console.log("connected");
   });
 
   socket.on('message', function(msg) {
@@ -11,9 +12,9 @@ $(document).ready(function() {
 
   $('#sendbutton').on('click', function() {
     socket.send({
+      type:"chat",
       name: $('#name').val(),
-      message:$('#message').val(),
-      type:"chat"
+      message:$('#message').val()
     });
   });
 });
