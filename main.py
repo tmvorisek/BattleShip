@@ -1,31 +1,35 @@
-from flask import Flask, render_template, send_from_directory
-from flask_socketio import SocketIO, send
+import sys
+from twisted.web.static import File
+from twisted.python import log
+from twisted.web.server import Site
+from twisted.internet import reactor
 
-import unittest
+from autobahn.twisted.websocket import WebSocketServerFactory, \
+    WebSocketServerProtocol
 
-
-app = Flask(__name__, static_url_path='')
-app.config['SECRET_KEY'] = 'GreatBigSecret'
-socketio = SocketIO(app)
-
-# @app.route('/css/<path:path>', methods=['GET'])
-# def send_css(path):
-  # return send_from_directory('css',path)
-
-@app.route('/js/<path:path>', methods=['GET'])
-def send_js(path):
-  return send_from_directory('js',path)
-
-@app.route('/')
-def index():
-  return render_template("./index.html")
+from autobahn.twisted.resource import WebSocketResource
 
 
-@socketio.on('message')
-def handleMessage(msg):
-  print(msg)
-  if( msg["type"] == "chat" ):
-    send(msg, broadcast=True)
+class SomeServerProtocol(WebSocketServerProtocol):
+    def onConnect(self, request):
+        print("some request connected {}".format(request))
 
-if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug = True)
+    def onMessage(self, payload, isBinary):
+        self.sendMessage("message received")
+
+
+if __name__ == "__main__":
+    log.startLogging(sys.stdout)
+
+    # static file server seving index.html as root
+    root = File(".")
+
+    factory = WebSocketServerFactory(u"ws://127.0.0.1:8080")
+    factory.protocol = SomeServerProtocol
+    resource = WebSocketResource(factory)
+    # websockets resource on "/ws" path
+    root.putChild(u"ws", resource)
+
+    site = Site(root)
+    reactor.listenTCP(8080, site)
+    reactor.run()
