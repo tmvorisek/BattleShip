@@ -9,15 +9,10 @@ class Ship():
     self._loc = location
     self._len = self.ships[type]
     self.calculateOffset(direction)
-    if not self.isValidLocation():
-      raise ValueError('Out of bounds _loc: ' + str(location) + ' in creation, ' + str(self._len * self._offset + self._loc) + '<' + str(boardWidth*boardHeight))
+    if not self.checkValidLocation():
+      raise ValueError('Out of bounds _loc: ' + str(location) + ' in creation, ' 
+        + str(self._len * self._offset + self._loc) + '<=' + str(boardWidth*boardHeight))
     self.assignCells(location)
-
-  def loc(self):
-    return self._loc
-
-  def len(self):
-    return self._len
 
   def calculateOffset(self, direction):
     if direction == "horizontal":
@@ -27,19 +22,16 @@ class Ship():
 
   def assignCells(self, location):
     self._cells = []
-    for i in range(0, self.len()):
-      cell_storing_location = self._loc + self._offset*i
-      self._cells.append(cell_storing_location)
-    print("cells: " + str(self._cells) + ", and direction: " + str(self._offset) + ".")
+    for i in range(0, self._len):
+      self._cells.append(self._loc + self._offset*i)
 
-  def isValidLocation(self):
+  def checkValidLocation(self):
     return (self._loc < boardWidth * boardHeight 
       and self._loc >= 0 
       and (((self._len + (self._loc % boardWidth) < boardWidth) 
           and self._offset == 1) 
         or ((self._len * self._offset + self._loc <= boardWidth*boardHeight) 
           and  self._offset == boardWidth)))
-
 
   def checkExists(self, location):
     return location in self._cells
@@ -66,10 +58,14 @@ class Game():
     pass
 
   def addShip(self, player_id, ship):
+
     if player_id == 1:
-      if not self.checkIfColliding(self.player1, ship):
-        self.player1.append(ship)
-        return True
+      player = self.player1
+    else:
+      player = self.player2
+    if not self.checkIfColliding(player, ship):
+      self.player1.append(ship)
+      return True
 
   def checkIfColliding(self, player, ship):
     for existingShip in player:
@@ -79,22 +75,24 @@ class Game():
 
 
 
-
-
-
 class TestBattleship(unittest.TestCase):
   def testShipCreation(self):
-    self.assertEqual(Ship().loc(), 0)
-    self.assertEqual(Ship(4).loc(), 4)
+    self.assertEqual(Ship()._loc, 0)
+    self.assertEqual(Ship(4)._loc, 4)
     with self.assertRaises(ValueError):
        Ship(200)
-    self.assertEqual(Ship(10, 'destroyer').len(),2)
+    self.assertEqual(Ship(10, 'destroyer')._len,2)
     self.assertTrue(Ship(50, direction="horizontal").checkExists(54))
     self.assertTrue(Ship(50, direction="vertical").checkExists(90))
     self.assertFalse(Ship(50).checkExists(55))
+    with self.assertRaises(ValueError):
+       Ship(99)
+    with self.assertRaises(ValueError):
+       Ship(80, direction="vertical")
 
   def testShipHits(self):
     testShip = Ship(50)
+    self.assertFalse(testShip.hit(1))
     self.assertTrue(testShip.hit(51))
     self.assertFalse(testShip.checkExists(51))
     self.assertFalse(testShip.hit(51))
@@ -105,10 +103,11 @@ class TestBattleship(unittest.TestCase):
     self.assertTrue(testShip.dead())
 
   def testBattleship(self):
-    self.assertTrue(Game())
     testShip = Ship(50)
     testGame = Game()
     self.assertTrue(testGame.addShip(1, testShip))
+    with self.assertRaises(ValueError):
+      testGame.addShip(1, testShip)
 
 
 def main():
