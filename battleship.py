@@ -6,11 +6,11 @@ boardHeight = 10
 class Ship():
   ships = {'carrier':5, 'battleship':4, 'cruiser':3, 'submarine':3, 'destroyer':2}
   def __init__(self, location = 0, type ='carrier', direction="horizontal"):
-    if not self.isValidLocation(location):
-      raise ValueError('Out of bounds _loc in creation')
     self._loc = location
     self._len = self.ships[type]
-    self.assignDirection(direction)
+    self.calculateOffset(direction)
+    if not self.isValidLocation():
+      raise ValueError('Out of bounds _loc: ' + str(location) + ' in creation, ' + str(self._len * self._offset + self._loc) + '<' + str(boardWidth*boardHeight))
     self.assignCells(location)
 
   def loc(self):
@@ -19,24 +19,27 @@ class Ship():
   def len(self):
     return self._len
 
-  def assignDirection(self, direction):
+  def calculateOffset(self, direction):
     if direction == "horizontal":
-      self._horz = 0
-      self._vert = 1
+      self._offset = 1
     else:
-      self._horz = 1
-      self._vert = 0
+      self._offset = boardWidth
 
   def assignCells(self, location):
     self._cells = []
     for i in range(0, self.len()):
-      cell_storing_location = self._loc + self._horz*boardWidth*i + i*self._vert
-      if not self.isValidLocation(cell_storing_location):
-        raise ValueError('Out of bounds cell_storing_location during assignCells:: value:' + str(cell_storing_location))
+      cell_storing_location = self._loc + self._offset*i
       self._cells.append(cell_storing_location)
+    print("cells: " + str(self._cells) + ", and direction: " + str(self._offset) + ".")
 
-  def isValidLocation(self, location):
-    return location < boardWidth * boardHeight and location >= 0
+  def isValidLocation(self):
+    return (self._loc < boardWidth * boardHeight 
+      and self._loc >= 0 
+      and (((self._len + (self._loc % boardWidth) < boardWidth) 
+          and self._offset == 1) 
+        or ((self._len * self._offset + self._loc <= boardWidth*boardHeight) 
+          and  self._offset == boardWidth)))
+
 
   def checkExists(self, location):
     return location in self._cells
@@ -80,17 +83,17 @@ class Game():
 
 
 class TestBattleship(unittest.TestCase):
-  def test_ShipClass(self):
+  def testShipCreation(self):
     self.assertEqual(Ship().loc(), 0)
-    self.assertEqual(Ship(8).loc(), 8)
+    self.assertEqual(Ship(4).loc(), 4)
     with self.assertRaises(ValueError):
        Ship(200)
     self.assertEqual(Ship(10, 'destroyer').len(),2)
-    self.assertFalse(Ship(10).isValidLocation(100))
-    self.assertTrue(Ship(10).isValidLocation(50))
     self.assertTrue(Ship(50, direction="horizontal").checkExists(54))
     self.assertTrue(Ship(50, direction="vertical").checkExists(90))
     self.assertFalse(Ship(50).checkExists(55))
+
+  def testShipHits(self):
     testShip = Ship(50)
     self.assertTrue(testShip.hit(51))
     self.assertFalse(testShip.checkExists(51))
@@ -101,7 +104,7 @@ class TestBattleship(unittest.TestCase):
     testShip.hit(54)
     self.assertTrue(testShip.dead())
 
-  def test_Battleship(self):
+  def testBattleship(self):
     self.assertTrue(Game())
     testShip = Ship(50)
     testGame = Game()
