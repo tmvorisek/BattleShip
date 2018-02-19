@@ -55,18 +55,24 @@ class Ship():
         return True
     return False
 
-class BattleshipGame():
+class Carrier(Ship):
+  def __init__(self):
+    self.special = True
+    super(Carrier, self).__init__()
 
+  def checkAddSpecial(self, turns):
+    if turns % 5 == 0:
+      self.special = True
+
+class BattleshipGame():
   shipMaxCount = 5
   def __init__(self):
+    self.current_player = 1
     self.player1 = []
     self.player2 = []
 
   def addShip(self, player_id, ship):
-    if player_id == 1:
-      player = self.player1
-    else:
-      player = self.player2
+    player = self.getPlayer(player_id)
     if (not self.checkIfColliding(player, ship)
       and len(player) < self.shipMaxCount):
       player.append(ship)
@@ -81,16 +87,31 @@ class BattleshipGame():
     return False
 
   def checkGameOver(self, player_id):
-    if player_id == 1:
-      player = self.player1
-    else:
-      player = self.player2
+    player = self.getPlayer(player_id)
     for ship in player:
       if not ship.dead():
         return False
     return True
 
+  def fire(self, locations):
+    hit = False
+    enemy_player = (~self.current_player) & 3
+    for ship in self.getPlayer(enemy_player):
+      for location in locations:
+        if ship.hit(location):
+          hit = True
+    self.current_player = enemy_player
+    return hit
 
+  def getPlayer(self, player_id):
+    if player_id == 1:
+      return self.player1
+    else:
+      return self.player2
+
+  def ready(self):
+    return (len(self.player1) == self.shipMaxCount 
+      and len(self.player2) == self.shipMaxCount)
 
 
 class TestBattleship(unittest.TestCase):
@@ -148,12 +169,20 @@ class TestBattleship(unittest.TestCase):
 
   def testBattleshipGameLogic(self):
     testGame2 = BattleshipGame()
+    self.assertFalse(testGame2.ready())
     for i in [0,10,20,30,40]:
       testGame2.addShip(1, Ship(i))
     for ship in testGame2.player1:
       for cell in ship._cells:
         ship.hit(cell)
     self.assertTrue(testGame2.checkGameOver(1))
+
+    for i in [50,60,70,80,90]:
+      testGame2.addShip(2, Ship(i))
+    self.assertTrue(testGame2.ready())
+    self.assertTrue(testGame2.fire([50,51,52,53,54]))
+    self.assertTrue(testGame2.player2[0].dead())
+
 
 
 
