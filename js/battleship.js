@@ -1,6 +1,8 @@
 $(document).ready(function() {
   var socket = io.connect('http://' + document.domain + ':' + location.port);
   
+  console.log(socket)
+  
   socket.on('connect', function() {
     console.log("connected");
   });

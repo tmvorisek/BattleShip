@@ -8,9 +8,9 @@ app = Flask(__name__, static_url_path='')
 app.config['SECRET_KEY'] = 'GreatBigSecret'
 socketio = SocketIO(app)
 
-# @app.route('/css/<path:path>', methods=['GET'])
-# def send_css(path):
-  # return send_from_directory('css',path)
+@app.route('/css/<path:path>', methods=['GET'])
+def send_css(path):
+  return send_from_directory('css',path)
 
 @app.route('/js/<path:path>', methods=['GET'])
 def send_js(path):
@@ -28,4 +28,4 @@ def handleMessage(msg):
     send(msg, broadcast=True)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug = True)
+    socketio.run(app, host='0.0.0.0', port=8080, debug = True)
