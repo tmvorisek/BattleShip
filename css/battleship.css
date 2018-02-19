@@ -25,14 +25,14 @@ html {
 }
 
 #main {
-  width: 700px;
+  width: 755px;
   height: 800px;
   margin: auto;
 
 }
 
 .board {
-  position: absolute;
+  /*position: absolute;*/
   width: 755px; 
   height: 380px;
   margin: 25px auto;
@@ -132,14 +132,16 @@ html {
 
 
 .panel {
-  float: right;
-  width: 275px;
-  height: 740px;
-  margin-top: 25px;
+  /*float: right;*/
+  position: absolute;
+  width: 755px;
+  height: 275px;
+
+  /*margin-top: 25px;*/
 }
 
 .topPanel {
-  width: 275px;
+  width: 45%;
   height: 350px;
   border: 2px solid #73B1B7;
   border-radius: 10px;
@@ -151,12 +153,11 @@ html {
 }
 
 .console {
-  position: relative;
-  width: 275px;
+  /*position: relative;*/
+  width: 47%;
   height: 350px;
-  margin-top: 36px;
-  display: block;
-
+  display: inline;
+  float:right;
   background: rgba(144,144,144,0.6);
   border: 2px solid #73B1B7;
   border-radius: 10px;
