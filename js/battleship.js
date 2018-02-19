@@ -1,20 +1,23 @@
 $(document).ready(function() {
-  var socket = io.connect('http://' + document.domain + ':' + location.port);
-  
-  socket.on('connect', function() {
-    console.log("connected");
-  });
+  var socket = io.connect('ws://' + document.domain + ':' + location.port + '/ws');
 
-  socket.on('message', function(msg) {
-    console.log(msg)
+  var mySocket = new WebSocket('ws://' + document.domain + ':' + location.port + '/ws');
+
+  mySocket.onopen = function (event) {
+  };
+  
+
+  mySocket.onmessage = function(event) {
+    console.log(event.data);
+    msg = JSON.parse(event.data);
     $("#messages").append('<li><b>'+msg.name+':</b> '+msg.message+'</li>');
-  });
+  };
 
   $('#sendbutton').on('click', function() {
-    socket.send({
+    mySocket.send(JSON.stringify({
       type:"chat",
       name: $('#name').val(),
       message:$('#message').val()
-    });
+    }));
   });
 });
