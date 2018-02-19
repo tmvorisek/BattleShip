@@ -37,13 +37,17 @@ class Ship():
     return location in self._cells
 
   def hit(self, location):
-    if self.checkExists(location):
-      self._cells.remove(location)
-      return True
+    for i in range(0, len(self._cells)):
+      if self._cells[i] == location:
+        self._cells[i] = -1
+        return True
     return False
 
   def dead(self):
-    return len(self._cells) == 0
+    for cell in self._cells:
+      if cell != -1:
+        return False
+    return True
 
   def collision(self, ship):
     for cell in self._cells:
@@ -51,27 +55,41 @@ class Ship():
         return True
     return False
 
-class Game():
-  player1 = []
-  player2 = []
+class BattleshipGame():
+
+  shipMaxCount = 5
   def __init__(self):
-    pass
+    self.player1 = []
+    self.player2 = []
 
   def addShip(self, player_id, ship):
-
     if player_id == 1:
       player = self.player1
     else:
       player = self.player2
-    if not self.checkIfColliding(player, ship):
-      self.player1.append(ship)
+    if (not self.checkIfColliding(player, ship)
+      and len(player) < self.shipMaxCount):
+      player.append(ship)
       return True
+    if (len(player) >= self.shipMaxCount):
+      raise ValueError("Already have " + str(self.shipMaxCount) + " ships assigned")
 
   def checkIfColliding(self, player, ship):
     for existingShip in player:
       if ship.collision(existingShip):
         raise ValueError('Collision with existing ship')
     return False
+
+  def checkGameOver(self, player_id):
+    if player_id == 1:
+      player = self.player1
+    else:
+      player = self.player2
+    for ship in player:
+      if not ship.dead():
+        return False
+    return True
+
 
 
 
@@ -102,12 +120,43 @@ class TestBattleship(unittest.TestCase):
     testShip.hit(54)
     self.assertTrue(testShip.dead())
 
-  def testBattleshipGame(self):
-    testShip = Ship(50)
-    testGame = Game()
+  def testBattleshipGameCreation(self):
+    testShip = Ship(0)
+    testGame = BattleshipGame()
     self.assertTrue(testGame.addShip(1, testShip))
-    with self.assertRaises(ValueError):
+    with self.assertRaises(ValueError): # Check that collisions raise an error.
       testGame.addShip(1, testShip)
+    testGame.addShip(1, Ship(10))
+    testGame.addShip(1, Ship(20))
+    testGame.addShip(1, Ship(30))
+    testGame.addShip(1, Ship(40))
+    with self.assertRaises(ValueError): # check that only 5 ships can be added per player.
+      testGame.addShip(1, Ship(50))
+
+    self.assertTrue(testGame.addShip(2, Ship(0)))
+    with self.assertRaises(ValueError): # Check that collisions raise an error.
+      testGame.addShip(2, Ship(0))
+    testGame.addShip(2, Ship(10))
+    testGame.addShip(2, Ship(20))
+    testGame.addShip(2, Ship(30))
+    testGame.addShip(2, Ship(40))
+    with self.assertRaises(ValueError): # check that only 5 ships can be added per player.
+      testGame.addShip(2, Ship(50))
+
+    with self.assertRaises(ValueError): # check that only 5 ships can be added per player.
+      testGame.addShip(2, Ship(2, direction="horizontal"))
+
+  def testBattleshipGameLogic(self):
+    testGame2 = BattleshipGame()
+    for i in [0,10,20,30,40]:
+      testGame2.addShip(1, Ship(i))
+    for ship in testGame2.player1:
+      for cell in ship._cells:
+        ship.hit(cell)
+    self.assertTrue(testGame2.checkGameOver(1))
+
+
+
 
 
 def main():
