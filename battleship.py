@@ -102,7 +102,7 @@ class TestBattleship(unittest.TestCase):
     testShip.hit(54)
     self.assertTrue(testShip.dead())
 
-  def testBattleship(self):
+  def testBattleshipGame(self):
     testShip = Ship(50)
     testGame = Game()
     self.assertTrue(testGame.addShip(1, testShip))
