@@ -23,9 +23,10 @@ def index():
 
 @socketio.on('message')
 def handleMessage(msg):
-  print(msg)
   if( msg["type"] == "chat" ):
-    send(msg.replace("<", " Hacker "), broadcast=True)
+    msg["message"] = msg["message"].replace("<", " I'm am Haxxoer! ")
+    send(msg, broadcast=True)
+  print(msg)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=8080, debug = True)
