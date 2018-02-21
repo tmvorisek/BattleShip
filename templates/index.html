@@ -5,7 +5,6 @@
   <title>Battle Ship</title>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<!-- <script src="js/battleship.js"></script> -->
 <link rel="stylesheet" type="text/css" href="css/battleship.css">
 <script type="text/javascript" src="js/battleship.js"></script>
 </head>
@@ -24,8 +23,8 @@
     <div class="panel">
       <div class="topPanel">
         <div class="layout">
-          <!-- <div class='buttons one'>One-Player</div> -->
-          <!-- <div class='buttons multi'>Two-Player</div> -->
+          <div class='buttons ship'>Carrier</div>
+          <div class='buttons direction'>Horizontal</div>
           <div class='buttons options'>Options</div>
         </div>
       </div>
@@ -36,6 +35,8 @@
       <div class="chat-text">
         <ul id="messages"></ul>
       </div>
+    </div>
+    <div class="chat-input">
       <input type="text" id="name" placeholder="Name"> <input type="text" id="message" placeholder="Message">
       <button id="sendbutton">Send</button>
     </div>
