@@ -1,25 +1,4 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,700);
-
-.chat-box {
-  /*position: absolute;*/
-  height: 335px;
-  bottom:30px;
-  margin-top: 30px;
-  left:2%;
-  width:100%;
-  border: 2px solid #73B1B7;
-  border-radius: 10px;
-}
-
-.chat-text {
-  border-style: 
-}
-
-* {
-  margin: 0;
-  padding: 0;
-}
-
 html {
   width: 100%;
   height: 100%;
@@ -162,25 +141,24 @@ html {
   background: rgba(144,144,144,0.6);
   border: 2px solid #73B1B7;
   border-radius: 10px;
-
   color: green;
 }
 
 .text {
-  position: relative;
-  width: 250px;
-  height: 375px;
-  margin: 12px;
+  /*position: relative;*/
+  width: 92%;
+  height: 86%;
+  margin: 4%;
   display: inline-block;
 }
 
 .buttons {
   position: relative;
   display: block;
-  width: 150px;
-  height: 40px;
+  /*width: 150px;*/
+  /*height: 40px;*/
 
-  margin: 50px auto;
+  margin: 10px;
   border: 2px solid #cccccc;
   border-radius: 5px;
   -webkit-border-radius: 5px;
@@ -371,3 +349,29 @@ html {
     left: 5px;
   }
 }
+
+.chat-box {
+  /*position: absolute;*/
+  height: 335px;
+  bottom:30px;
+  margin-top: 30px;
+  left:2%;
+  width:100%;
+  border: 2px solid #73B1B7;
+  border-radius: 10px;
+  overflow: auto;
+
+}
+
+.chat-text {
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.chat-input {
+  float:bottom;
+}
+

@@ -1,3 +1,8 @@
+
+var orientation = "horz";
+var my_turn = false;
+var my_shots = []
+
 $(document).ready(function() {
 
   var socket = io.connect( 'http://' + document.domain + ':' + location.port );
@@ -58,19 +63,79 @@ $(document).ready(function() {
 
   $('.direction').on('click', function() {
     direction = $(".direction").text();
-    if (direction == "Horizontal")
-       $('.direction').text("Vertical");
-    else if (direction == "Vertical")
-       $('.direction').text("Horizontal");
+    if (direction == "Horizontal"){
+      $('.direction').text("Vertical");
+      orientation = "vert"
+    }
+    else if (direction == "Vertical"){
+      $('.direction').text("Horizontal");
+      orientation = "horz"
+    }
   });
+
   $(".top").find(".points").off("mouseenter mouseover").on("mouseenter mouseover", function() {
     // only allow target highlight on none attempts
     if(!($(this).hasClass("used"))) topBoard.highlight(this);
   });
+
+  $(".bottom").find(".points").off("mouseenter").on("mouseenter", function() {
+    var num = $(this).attr('class').slice(15);
+    ship_len = 5;
+
+    if (orientation == "horz") displayShipHorz(parseInt(num), ship_len, this);
+    else displayShipVert(parseInt(num), ship_len, this);
+  });
 });
 
-my_turn = false;
-my_shots = []
+
+function displayShipHorz(location, length, point) {
+  var endPoint = location + length - 2;
+  if (!(endPoint % 10 >= 0 && endPoint % 10 < length - 1)) {
+    for (var i = location; i < (location + length); i++) {
+      $(".bottom ." + i).addClass("highlight");
+    }
+    // $(point).off("click").on("click", function() {
+      // setShip(location, ship, "horz", fleet, "self");
+    // });
+  }
+  $(point).off("mouseleave").on("mouseleave", function() {
+    removeShipHorz(location, length);
+  });
+}
+
+function removeShipHorz(location, length) {
+  for (var i = location; i < location + length; i++) {
+    $(".bottom ." + i).removeClass("highlight");
+  }
+}
+
+
+function displayShipVert(location, length, point) {
+  var endPoint = (length * 10) - 10;
+  var inc = 0; 
+  if (location + endPoint <= 100) {
+    for (var i = location; i < (location + length); i++) {
+      $(".bottom ." + (location + inc)).addClass("highlight");
+      inc = inc + 10;
+    }
+    $(point).off("click").on("click", function() {
+      setShip(location, ship, "vert", fleet, "self");
+    });
+  }
+  $(point).off("mouseleave").on("mouseleave", function() {
+    removeShipVert(location, length);
+  });
+}
+
+function removeShipVert(location, length) {
+  var inc = 0;
+  for (var i = location; i < location + length; i++) {
+    $(".bottom ." + (location + inc)).removeClass("highlight");
+    inc = inc + 10;
+  }
+}
+
+
 
 // Objects for playing the game and bot for playing the computer
 var topBoard = {
