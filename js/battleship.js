@@ -1,6 +1,7 @@
 
 var socket;
 
+var boardWidth = 10; // Not currently a proper way to designate width.
 var active_orientation = "horz";
 var phase = "placement";
 ships = {
@@ -16,7 +17,6 @@ $(document).ready(function() {
   socket = io.connect( 'http://' + document.domain + ':' + location.port );
 
   for (var i = 1; i <= 100; i++) {
-    // The number and letter designators
     if (i < 11) {
       $(".top").prepend("<span class='aTops'>" + Math.abs(i - 11) + "</span>");
       $(".bottom").prepend("<span class='aTops'>" + Math.abs(i - 11) + "</span>");
@@ -127,12 +127,16 @@ var enemyBoard = {
 function placeShip(location, length, direction, ship) {
   if (direction == "horizontal"){
     for (var i = location; i < (location + length); i++) {
-      console.log(i, location+length)
       $(".bottom ." + i).addClass(ship);
       $(".bottom ." + i).children().removeClass("hole");
     }
   } else {
-
+    var inc = 0;
+    for (var i = location; i < (location + length); i++) {
+      $(".bottom ." + (location + inc)).addClass(ship);
+      $(".bottom ." + (location + inc)).children().removeClass("hole");
+      inc = inc + boardWidth;
+    }
   }
 };
 
