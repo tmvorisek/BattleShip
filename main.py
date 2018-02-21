@@ -27,20 +27,26 @@ def index():
 
 @socketio.on('connect')
 def handleConnection():
+  print("New connection.")
   for msg in message_history:
     send(msg)
 
 @socketio.on('message')
 def handleMessage(msg):
   global message_history
-  msg["message"] = msg["message"].replace("<", " I'm am Haxxoer! ")
-  msg["name"] = msg["name"].replace("<", " I'm am Haxxoer! ")
   
-  if( msg["type"] == "chat" 
-    and msg["message"] != ""
-    and len(msg["message"]) < 240):
-      send(msg, broadcast=True)
-      message_history.append({"name":msg["name"], "message":msg["message"], "type":"chat"})
+  if "type" in msg:
+    if( msg["type"] == "chat" 
+      and msg["message"] != ""
+      and len(msg["message"]) < 240):
+        if "message" in msg:
+          msg["message"] = msg["message"].replace("<", " I'm am Haxxoer! ")
+        if "name" in msg:
+          msg["name"] = msg["name"].replace("<", " I'm am Haxxoer! ")
+        send(msg, broadcast=True)
+        message_history.append({"name":msg["name"], "message":msg["message"], "type":"chat"})
+    elif (msg["type"] == "place-ship"):
+      send(msg)
   print(msg)
 
 if __name__ == '__main__':
