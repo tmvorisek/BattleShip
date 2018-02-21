@@ -2,6 +2,13 @@
 var orientation = "horz";
 var my_turn = false;
 var my_shots = []
+ships = {
+  "Carrier": 5, 
+  "Battleship":4, 
+  "Cruiser":3, 
+  "Submarine":3, 
+  "Destroyer":2
+}
 
 $(document).ready(function() {
 
@@ -80,7 +87,7 @@ $(document).ready(function() {
 
   $(".bottom").find(".points").off("mouseenter").on("mouseenter", function() {
     var num = $(this).attr('class').slice(15);
-    ship_len = 5;
+    ship_len = ships[$(".ship").text()];
 
     if (orientation == "horz") displayShipHorz(parseInt(num), ship_len, this);
     else displayShipVert(parseInt(num), ship_len, this);
