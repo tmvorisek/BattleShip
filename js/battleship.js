@@ -1,5 +1,6 @@
 
 var socket;
+var id_hash = Math.random().toString(36).substring(2);
 
 var boardWidth = 10; // Not currently a proper way to designate width.
 var active_orientation = "horz";
@@ -14,7 +15,7 @@ ships = {
 
 $(document).ready(function() {
 
-  socket = io.connect( 'http://' + document.domain + ':' + location.port );
+  socket = io.connect( 'http://' + document.domain + ':' + location.port);
 
   for (var i = 1; i <= 100; i++) {
     if (i < 11) {
@@ -37,6 +38,8 @@ $(document).ready(function() {
   };
   
   socket.on('connect', function() {
+    $(".text").text("Welcome, to Battleship!");
+    socket.send({"type":"hand-shake", "id":id_hash})
   });
 
   socket.on('message', function(msg) {
@@ -46,7 +49,10 @@ $(document).ready(function() {
       $(".chat-text").scollTop=1;
     }
     else if (msg.type == "place-ship"){
-      placeShip(Number(msg.location), Number(msg.length), msg.direction, msg.ship);
+      placeShip(Number(msg.location)+1, Number(msg.length), msg.direction, msg.ship);
+    }
+    else if (msg.type == "alert"){
+      $(".text").text(msg.message);
     }
   });
 
@@ -200,7 +206,7 @@ function sendChatMessage(){
 
 function sendShip(location){
   socket.send({
-    location: String(location),
+    location: String(location - 1),
     ship: $('.ship').text().toLowerCase(),
     direction: $('.orientation').text().toLowerCase(),
     length: ships[$('.ship').text()],
