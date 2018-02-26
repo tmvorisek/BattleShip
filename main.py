@@ -17,6 +17,7 @@ socketio = SocketIO(app)
 message_history = []
 games = {}
 players = {}
+player_numbers = {}
 
 
 @app.route('/css/<path:path>', methods=['GET'])
@@ -38,7 +39,7 @@ def handleJoin(data):
 @socketio.on('connect')
 def handleConnection():
   for msg in message_history:
-    send(msg, room)
+    send(msg)
   send({
     "type":"chat", 
     "name":"Server", 
@@ -52,13 +53,7 @@ def handleMessage(msg):
   if check_valid_chat(msg):
     handle_chat(msg)
   elif (msg["type"] == "place-ship"):
-    try:
-      pass
-    except ValueError as e:
-      send_alert(str(e))
-    else:
-      alert_ship_placement(msg)
-      send(msg)
+    place_ship(msg)
   elif (msg["type"] == "hand-shake"):
     hand_shake(msg)
   print(msg)
@@ -77,17 +72,34 @@ def handle_chat(msg):
     "name":msg["name"], 
     "message":msg["message"], 
     "type":"chat"})
- 
+
+def place_ship(msg):
+  try:
+    player_id = msg["id"]
+    player_no = player_numbers[player_id]
+    game = games[players[player_id]]
+    ship = Ship(
+      int(msg["location"]), 
+      type=msg["ship"], 
+      direction=msg["direction"])
+    game.addShip(player_no, ship)
+  except ValueError as e:
+    send_alert(str(e))
+  else:
+    alert_ship_placement(msg)
+    send(msg)
+
 def hand_shake(msg):
-    players[msg["id"]] = get_a_game()
+    players[msg["id"]] = get_a_game(msg["id"])
     send({
       "type":"room-join",
       "room":players[msg["id"]]})
 
-def get_a_game():
+def get_a_game(player_id):
   if len(players)%2 == 0:
     game = str(uuid4().hex)
     games[game] = BattleshipGame()
+    player_numbers[player_id] = 1
     join_room(game)
     send_alert("New Game started waiting on player two.")
     return game
@@ -100,6 +112,7 @@ def get_a_game():
         seen_games[game]=1
     for (game, count) in seen_games.items():
       if count == 1:
+        player_numbers[player_id] = 2
         join_room(game)
         send_alert("Game ready", game)
         return game
