@@ -375,3 +375,7 @@ html {
   float:bottom;
 }
 
+.gameid {
+  display: inline;
+  float: right;
+}

@@ -1,6 +1,7 @@
 
 var socket;
-var id_hash = Math.random().toString(36).substring(2);
+var player_id = Math.random().toString(36).substring(2);
+var room;
 
 var boardWidth = 10; // Not currently a proper way to designate width.
 var active_orientation = "horz";
@@ -39,7 +40,7 @@ $(document).ready(function() {
   
   socket.on('connect', function() {
     $(".text").text("Welcome, to Battleship!");
-    socket.send({"type":"hand-shake", "id":id_hash})
+    socket.send({"type":"hand-shake", "id":player_id})
   });
 
   socket.on('message', function(msg) {
@@ -47,6 +48,10 @@ $(document).ready(function() {
     if (msg.type == "chat"){
       $("#messages").append('<li><b>'+msg.name+':</b> '+msg.message+'</li>');
       $(".chat-text").scollTop=1;
+    }
+    else if (msg.type == "room-join"){
+      room = msg.room;
+      $(".gameid").text(room.substr(0,12))
     }
     else if (msg.type == "place-ship"){
       placeShip(Number(msg.location)+1, Number(msg.length), msg.direction, msg.ship);
@@ -210,6 +215,7 @@ function sendShip(location){
     ship: $('.ship').text().toLowerCase(),
     direction: $('.orientation').text().toLowerCase(),
     length: ships[$('.ship').text()],
+    id: player_id,
     type:"place-ship"
   });
 
