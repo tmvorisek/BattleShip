@@ -76,7 +76,7 @@ def handle_chat(msg):
 
 def handle_place_ship(msg):
   if msg["ship"] in player_ships[msg["id"]]:
-    send_alert(msg["ship"]+" already placed.")
+    send_alert(msg["ship"].title()+" already placed.")
     return
   else:
     player_ships[msg["id"]].append(msg["ship"])
