@@ -48,14 +48,14 @@ def handleConnection():
 
 @socketio.on('message')
 def handleMessage(msg):
-  global message_history
-  
   if check_valid_chat(msg):
     handle_chat(msg)
   elif (msg["type"] == "place-ship"):
-    place_ship(msg)
+    handle_place_ship(msg)
   elif (msg["type"] == "hand-shake"):
-    hand_shake(msg)
+    handle_hand_shake(msg)
+  elif (msg["type"] == "fire"):
+    handle_fire(msg)
   print(msg)
 
 def check_valid_chat(msg):
@@ -73,7 +73,7 @@ def handle_chat(msg):
     "message":msg["message"], 
     "type":"chat"})
 
-def place_ship(msg):
+def handle_place_ship(msg):
   try:
     player_id = msg["id"]
     player_no = player_numbers[player_id]
@@ -88,11 +88,16 @@ def place_ship(msg):
   else:
     alert_ship_placement(msg)
     send(msg)
+    if game.ready():
+      send_alert("All ships placed... Player 1 ready to fire!", 
+        players[player_id])
+      send({"type":"game-begun"},room=players[player_id])
 
-def hand_shake(msg):
+def handle_hand_shake(msg):
     players[msg["id"]] = get_a_game(msg["id"])
     send({
       "type":"room-join",
+      "number":player_numbers[msg["id"]],
       "room":players[msg["id"]]})
 
 def get_a_game(player_id):
@@ -114,17 +119,37 @@ def get_a_game(player_id):
       if count == 1:
         player_numbers[player_id] = 2
         join_room(game)
-        send_alert("Game ready", game)
+        send_alert("Game ready, place ships!", game)
         return game
 
+def send_shot(rm, player_no, locations, hit, shot):
+  send({"type":"fire", "shot":shot,"player_no":player_no,
+    "locations":locations, "hit":hit}, room=rm)
 
-def alert_ship_placement(msg):
+def handle_fire(msg):
+  try:
+    player_id = msg["id"]
+    player_no = player_numbers[player_id]
+    game = games[players[player_id]]
+    locations = [int(msg["location"])]
+    hit = False
+    if player_no == game.current_player:
+      if msg["shot"] == "normal":
+        hit = game.fire([locations[0]])
+      send_shot(players[player_id], player_no, 
+        locations, hit, msg["shot"])
+    else:
+      send_alert("Wait your turn!")
+  except ValueError as e:
+    send_alert(str(e))
+
+def alert_ship_placement(msg, rm=None):
   x = (int(msg["location"]) % 10) + 1
   y = (int(msg["location"]) / 10) + 1
   send_alert(
     msg["ship"].title() + " placed. " 
     + msg["direction"].title() + ", at (" 
-    + str(x) + "," + str(y) + ").")
+    + str(x) + "," + str(y) + ").", rm)
 
 def send_alert(message, rm=None):
   send({"type":"alert", "message":message}, room=rm)
@@ -134,3 +159,4 @@ if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=8080, debug = True)
   else:    
     socketio.run(app, host='0.0.0.0', port=80)
+

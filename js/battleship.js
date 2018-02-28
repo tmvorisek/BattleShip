@@ -1,8 +1,11 @@
 
 var socket;
-var player_id = Math.random().toString(36).substring(2);
+var turn;
 var room;
 
+var player_id = Math.random().toString(36).substring(2);
+var player_no = 0;
+var shot_type = "normal";
 var boardWidth = 10; // Not currently a proper way to designate width.
 var active_orientation = "horz";
 var phase = "placement";
@@ -43,6 +46,7 @@ $(document).ready(function() {
     socket.send({"type":"hand-shake", "id":player_id})
   });
 
+  // Message Handler -----------------------------------------------------------
   socket.on('message', function(msg) {
     console.log(msg);
     if (msg.type == "chat"){
@@ -51,13 +55,32 @@ $(document).ready(function() {
     }
     else if (msg.type == "room-join"){
       room = msg.room;
-      $(".gameid").text(room.substr(0,12))
+      player_no = Number(msg.number);
+      $(".playerno").text("PNum:" + String(player_no));
+      $(".gameid").text("Game id: " + room.substr(0,12));
     }
     else if (msg.type == "place-ship"){
       placeShip(Number(msg.location)+1, Number(msg.length), msg.direction, msg.ship);
     }
     else if (msg.type == "alert"){
       $(".text").text(msg.message);
+    }
+    else if (msg.type == "game-begun"){
+      phase = "firing";
+      turn = 1;
+    }
+    else if (msg.type == "fire"){
+      turn = 3-msg.player_no;
+      hit = msg.hit ? "hit" : "miss";
+      board = (msg.player_no == player_no) ? ".top" : ".bottom";
+      for (i = 0; i < msg.locations.length; i++){
+        loc = msg.locations[i] + 1
+        $(board).find("."+(loc)).children().addClass(hit);
+        console.log("here:"+loc)
+        console.log($(board).find(String(loc)).children());
+      }
+      $(".text").text("Player " + String(msg.player_no) + " fired " + msg.shot 
+        + " shot at location " + String(msg.locations[0]+1) + ", " + hit + "!");
     }
   });
 
@@ -98,8 +121,7 @@ $(document).ready(function() {
   });
 
   $(".top").find(".points").off("mouseenter mouseover").on("mouseenter mouseover", function() {
-    // only allow target highlight on none attempts
-    if(!($(this).hasClass("used"))) enemyBoard.highlight(this);
+    if(!($(this).hasClass("used")) && phase == "firing") enemyBoard.highlight(this);
   });
 
   $(".bottom").find(".points").off("mouseenter").on("mouseenter", function() {
@@ -120,16 +142,15 @@ var enemyBoard = {
 
     $(square).off("click").on("click", function() {
       if(!($(this).hasClass("used"))) {
-        if (my_turn == true){
-          $(this).removeClass("target").addClass("used");
-        }
+        // $(this).removeClass("target").addClass("used");
         var num = parseInt($(this).attr("class").slice(15));
-        var bool = enemyFleet.checkIfHit(num);
-        if (false == bool) {
-          $(".text").text(output.miss("You"));
-          $(this).children().addClass("miss");
-        } else $(this).children().addClass("hit");
-        $(".top").find(".points").off("mouseenter").off("mouseover").off("mouseleave").off("click");
+        fire(num);
+
+        //if (false == bool) {
+          //$(".text").text(output.miss("You"));
+          //$(this).children().addClass("miss");
+        //} else $(this).children().addClass("hit");
+        //$(".top").find(".points").off("mouseenter").off("mouseover").off("mouseleave").off("click");
       } 
     });
   },
@@ -153,7 +174,7 @@ function placeShip(location, length, direction, ship) {
 
 function displayShipHorz(location, length, point) {
   var endPoint = location + length - 2;
-  if (!(endPoint % 10 >= 0 && endPoint % 10 < length - 1)) {
+  if (!(endPoint % boardWidth >= 0 && endPoint % boardWidth < length - 1)) {
     for (var i = location; i < (location + length); i++) {
       $(".bottom ." + i).addClass("highlight");
     }
@@ -174,12 +195,12 @@ function removeShipHorz(location, length) {
 
 
 function displayShipVert(location, length, point) {
-  var endPoint = (length * 10) - 10;
+  var endPoint = (length * boardWidth) - boardWidth;
   var inc = 0; 
   if (location + endPoint <= 100) {
     for (var i = location; i < (location + length); i++) {
       $(".bottom ." + (location + inc)).addClass("highlight");
-      inc = inc + 10;
+      inc = inc + boardWidth;
     }
     $(point).off("click").on("click", function() {
       sendShip(location);
@@ -211,12 +232,20 @@ function sendChatMessage(){
 
 function sendShip(location){
   socket.send({
+    type:"place-ship",
     location: String(location - 1),
     ship: $('.ship').text().toLowerCase(),
     direction: $('.orientation').text().toLowerCase(),
     length: ships[$('.ship').text()],
-    id: player_id,
-    type:"place-ship"
+    id: player_id
   });
+}
 
+function fire(location) {
+  socket.send({
+    type:"fire",
+    shot:shot_type,
+    location: String(location - 1),
+    id:player_id
+  });
 }

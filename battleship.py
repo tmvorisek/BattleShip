@@ -10,7 +10,7 @@ class Ship():
     self._len = self.ships[type]
     self.calculateOffset(direction)
     if not self.checkValidLocation():
-      raise ValueError('Out of bounds _loc: ' + str(location) + ' in creation, ' 
+      raise ValueError('Out of bounds loc: ' + str(location) + ' in creation, ' 
         + str(self._len * self._offset + self._loc) + '<=' + str(boardWidth*boardHeight))
     self.assignCells(location)
 
@@ -28,9 +28,9 @@ class Ship():
   def checkValidLocation(self):
     return (self._loc < boardWidth * boardHeight 
       and self._loc >= 0 
-      and (((self._len + (self._loc % boardWidth) < boardWidth) 
+      and (((self._len + (self._loc % boardWidth) <= boardWidth) 
           and self._offset == 1) 
-        or ((self._len * self._offset + self._loc <= boardWidth*boardHeight) 
+        or (((self._len-1) * self._offset + self._loc <= boardWidth*boardHeight) 
           and  self._offset == boardWidth)))
 
   def checkExists(self, location):
@@ -55,6 +55,8 @@ class Ship():
         return True
     return False
 
+
+
 class Carrier(Ship):
   def __init__(self):
     self.special = True
@@ -64,12 +66,19 @@ class Carrier(Ship):
     if turns % 5 == 0:
       self.special = True
 
+
+
 class BattleshipGame():
   shipMaxCount = 5
-  def __init__(self):
+  def __init__(self, player_id = "1"):
     self.current_player = 1
+    self.players={}
+    self.players[player_id] = 1
     self.player1 = []
     self.player2 = []
+
+  def addPlayer(self, player_id = "2"):
+    self.players[player_id] = player_id
 
   def addShip(self, player_id, ship):
     player = self.getPlayer(player_id)
@@ -78,7 +87,8 @@ class BattleshipGame():
       player.append(ship)
       return True
     if (len(player) >= self.shipMaxCount):
-      raise ValueError("Already have " + str(self.shipMaxCount) + " ships assigned")
+      raise ValueError("Already have " + str(self.shipMaxCount) 
+        + " ships assigned")
 
   def checkIfColliding(self, player, ship):
     for existingShip in player:

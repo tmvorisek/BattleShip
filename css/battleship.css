@@ -379,3 +379,8 @@ html {
   display: inline;
   float: right;
 }
+
+.playerno {
+  display: inline;
+  /*float: right;*/
+}
