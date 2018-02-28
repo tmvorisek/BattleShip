@@ -138,6 +138,10 @@ def handle_fire(msg):
         hit = game.fire([locations[0]])
       send_shot(players[player_id], player_no, 
         locations, hit, msg["shot"])
+      if game.checkGameOver(3-player_no):
+        send_alert("GAME OVER, PLAYER " + str(player_no) + " WINS!!",
+          players[player_id])
+        send({"type":"game-over"},players[player_id])
     else:
       send_alert("Wait your turn!")
   except ValueError as e:

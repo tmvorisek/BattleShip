@@ -82,6 +82,9 @@ $(document).ready(function() {
       $(".text").text("Player " + String(msg.player_no) + " fired " + msg.shot 
         + " shot at location " + String(msg.locations[0]+1) + ", " + hit + "!");
     }
+    else if (msg.type == "game_over"){
+      phase = "game_over"
+    }
   });
 
 
@@ -242,10 +245,11 @@ function sendShip(location){
 }
 
 function fire(location) {
-  socket.send({
-    type:"fire",
-    shot:shot_type,
-    location: String(location - 1),
-    id:player_id
-  });
+  if (phase == "firing")
+    socket.send({
+      type:"fire",
+      shot:shot_type,
+      location: String(location - 1),
+      id:player_id
+    });
 }
