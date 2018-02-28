@@ -18,6 +18,7 @@ message_history = []
 games = {}
 players = {}
 player_numbers = {}
+player_ships = {}
 
 
 @app.route('/css/<path:path>', methods=['GET'])
@@ -74,6 +75,11 @@ def handle_chat(msg):
     "type":"chat"})
 
 def handle_place_ship(msg):
+  if msg["ship"] in player_ships[msg["id"]]:
+    send_alert(msg["ship"]+" already placed.")
+    return
+  else:
+    player_ships[msg["id"]].append(msg["ship"])
   try:
     player_id = msg["id"]
     player_no = player_numbers[player_id]
@@ -95,6 +101,7 @@ def handle_place_ship(msg):
 
 def handle_hand_shake(msg):
     players[msg["id"]] = get_a_game(msg["id"])
+    player_ships[msg["id"]] = []
     send({
       "type":"room-join",
       "number":player_numbers[msg["id"]],
